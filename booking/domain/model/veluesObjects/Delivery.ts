@@ -1,0 +1,76 @@
+import { Voyage } from "./Voyage";
+import { LastCargoHandledEvent } from "./LastCargoHandledEvent";
+import { CargoHandlingActivity } from "./CargoHandlingActivity";
+import { CargoItinerary } from "./CargoItinerary";
+import { RouteEspecification } from "./RouteSpecification";
+import { Location } from "../entities/Location";
+
+export enum RoutingStatus {
+    NOT_ROUTED =  "NOT_ROUTED",
+    ROUTED = "ROUTED"
+}
+
+export enum TransportStatus {
+    NOT_RECEIVED = "NOT_RECEIVED",
+    ONBOARD_CARRIER = "ONBOARD_CARRIER",
+    IN_PORT = "IN_PORT",
+    CLAIMED = "CLAIMED",
+    UNKNOWN = "UNKNOWN"
+}
+
+export class Delivery {
+    public static readonly ETA_UNKOWN: Date = null;
+
+    private _routingStatus: RoutingStatus;
+
+    private _transportStatus: TransportStatus;
+
+    private _lastKnownLocation: Location;
+
+    private voyage: Voyage;
+
+    private _lastEvent: LastCargoHandledEvent;
+
+    public static readonly NO_ACTIVITY  = new CargoHandlingActivity();
+
+    private nextExpectedActivity: CargoHandlingActivity
+
+    constructor(lastEvent: LastCargoHandledEvent, 
+        itinairary: CargoItinerary, routeSpecification: RouteEspecification) {
+            this._lastEvent = lastEvent;
+            this._routingStatus = this.calculateRoutingStatus(itinairary, routeSpecification);
+            this._transportStatus = this.calculateTransportStatus();
+            this._lastKnownLocation = this.calculateLastKnownLocation();
+        }
+    
+    private calculateRoutingStatus(itinerary: CargoItinerary, routeSpecification: RouteEspecification): RoutingStatus {
+        if(itinerary == null || itinerary == CargoItinerary.EMPTY_INTINERARY)
+            return RoutingStatus.NOT_ROUTED;
+        else
+            return RoutingStatus.ROUTED
+    }
+
+    private calculateTransportStatus(): TransportStatus {
+        if(this._lastEvent.handlingEventType == null) 
+            return TransportStatus.NOT_RECEIVED;
+        
+        switch(this._lastEvent.handlingEventType) {
+            case "LOAD":
+                return TransportStatus.ONBOARD_CARRIER;
+            case "UNLOAD":
+            case "RECEIVE":
+            case "CUSTOMS":
+                return TransportStatus.IN_PORT;
+            case "CLAIM":
+                return TransportStatus.CLAIMED;
+            default:
+                return TransportStatus.UNKNOWN;
+        }
+    }
+
+    private calculateLastKnownLocation(): Location {
+        if(!this._lastEvent)
+            return new Location(this._lastEvent.handlingEventLocation)
+        return null;
+    }
+}
