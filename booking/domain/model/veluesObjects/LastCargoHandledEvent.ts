@@ -8,7 +8,7 @@ export class LastCargoHandledEvent {
     private _handlingEventLocation: string;
 
     //Null object pattern.
-    public static readonly LastCargoHandledEvent = new LastCargoHandledEvent();
+    public static readonly EMPTY = new LastCargoHandledEvent();
 
     constructor( handlerEventId?: number, handlingEventType?: string,
         handlingEventVoyage?: string, handlingEventLocation?: string ) {

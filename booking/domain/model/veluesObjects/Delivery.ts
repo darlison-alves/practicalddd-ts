@@ -27,13 +27,13 @@ export class Delivery {
 
     private _lastKnownLocation: Location;
 
-    private voyage: Voyage;
+    private _currentVoyage: Voyage;
 
     private _lastEvent: LastCargoHandledEvent;
 
     public static readonly NO_ACTIVITY  = new CargoHandlingActivity();
 
-    private nextExpectedActivity: CargoHandlingActivity
+    private _nextExpectedActivity: CargoHandlingActivity
 
     constructor(lastEvent: LastCargoHandledEvent, 
         itinairary: CargoItinerary, routeSpecification: RouteEspecification) {
@@ -41,7 +41,16 @@ export class Delivery {
             this._routingStatus = this.calculateRoutingStatus(itinairary, routeSpecification);
             this._transportStatus = this.calculateTransportStatus();
             this._lastKnownLocation = this.calculateLastKnownLocation();
+            this._currentVoyage = this.calculateCurrentVoyage();
         }
+
+    public updateOnRouting(routeSpecification: RouteEspecification, itinerary: CargoItinerary): Delivery {
+        return new Delivery(this._lastEvent, itinerary, routeSpecification);
+    }
+
+    public static delivedFrom( routeSpecification: RouteEspecification, itinerary: CargoItinerary, lastCargoHandledEvent: LastCargoHandledEvent ): Delivery {
+        return new Delivery(lastCargoHandledEvent, itinerary, routeSpecification);
+    }
     
     private calculateRoutingStatus(itinerary: CargoItinerary, routeSpecification: RouteEspecification): RoutingStatus {
         if(itinerary == null || itinerary == CargoItinerary.EMPTY_INTINERARY)
@@ -68,9 +77,20 @@ export class Delivery {
         }
     }
 
+    get transportStatus() {
+        return this._transportStatus;
+    }
+
     private calculateLastKnownLocation(): Location {
         if(!this._lastEvent)
             return new Location(this._lastEvent.handlingEventLocation)
         return null;
+    }
+
+    private calculateCurrentVoyage(): Voyage {
+        if(this.transportStatus === TransportStatus.ONBOARD_CARRIER && !this._lastEvent)
+            return new Voyage(this._lastEvent.handlingEventVoyage);
+        else
+            return null
     }
 }

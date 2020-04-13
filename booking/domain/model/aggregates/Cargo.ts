@@ -5,6 +5,7 @@ import { RouteEspecification } from "../veluesObjects/RouteSpecification";
 import { CargoItinerary } from "../veluesObjects/CargoItinerary";
 import { BookCargoCommand } from "../commands/BookCargoCommand";
 import { Delivery } from "../veluesObjects/Delivery";
+import { LastCargoHandledEvent } from "../veluesObjects/LastCargoHandledEvent";
 
 export class Cargo { 
     private _id: number;
@@ -34,10 +35,50 @@ export class Cargo {
 
         this._bookingAmount = new BookingAmount(bookCargoCommand.bookingAmount);
 
-        this._itinerary = CargoItinerary.EMPTY_INTINERARY
+        this._itinerary = CargoItinerary.EMPTY_INTINERARY;
 
+        this._delivery = Delivery.delivedFrom(this._routeSpecification, this._itinerary, LastCargoHandledEvent.EMPTY)
 
+    }
 
+    get bookingId() {
+        return this._bookingId;
+    }
+
+    set origin(origin: Location) {
+        this._origin = origin
+    }
+
+    get origin() {
+        return this._origin
+    }
+
+    set bookingAmount( bookingAmount: BookingAmount ) {
+        this._bookingAmount = bookingAmount
+    }
+
+    get bookingAmount() {
+        return this._bookingAmount
+    }
+
+    get routeSpecification() {
+        return this._routeSpecification;
+    }
+
+    set routeSpecification( routeSpecification: RouteEspecification) {
+        this._routeSpecification = routeSpecification
+    }
+
+    get itinerary() {
+        return this._itinerary;
+    }
+
+    set itinerary( cargoItinerary: CargoItinerary ) {
+        this._itinerary = cargoItinerary
+    }
+
+    public assignToRoute(cargoItinerary: CargoItinerary): void {
+        this._itinerary = cargoItinerary
     }
     
 }
